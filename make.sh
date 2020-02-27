@@ -70,9 +70,14 @@ get_script_dir () {
 commandLine="swift $mode -c $config"
 LD_LIBRARY_PATH=""
 
+# Find the manifest path
+# Because we're in a submodule of the root directory, we search one level up from the script location
+manifestPath="$( realpath "$(get_script_dir)/../dylib.manifest" )"
+echo "Loooking for the manifest at $manifestPath"
+
 # Read the manifest file
 # If it exists, it must be in the format projectName tag
-manifestPath="$(get_script_dir)/dylib.manifest"
+
 if [ -f $manifestPath ]; then
     echo "Reading manifest at $manifestPath"
 
@@ -131,7 +136,7 @@ if [ -f $manifestPath ]; then
     done < "$manifestPath"
 
 else
-    echo "No manifest found at $manifestPath"
+    echo "No manifest found."
 fi
 
 # Export required variables
