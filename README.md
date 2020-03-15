@@ -46,3 +46,10 @@ In order to view the dynamic library paths used for a project, execute:
 ```bash
 dylib
 ```
+
+### Emacs
+In order to inform emacs of the use of dynamic libraries a configuration file is required.  This can be generated automatically by executing:
+```bash
+dylibEmacs
+```
+in the root of the project.
