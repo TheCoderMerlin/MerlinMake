@@ -1,7 +1,6 @@
 #!/bin/bash
-
-# make.sh
-# Copyright (C) 2018 Tango Golf Digital, LLC
+# This script is part of the MerlinMake repository
+# Copyright (C) 2018,2019,2020 Tango Golf Digital, LLC
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -13,14 +12,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# This script generates the command line required to use the proper version of merlin libraries both for
-# compiling a project and for executing the project.  The command is then executed.
+# This script is generally included as a submodule within a Swift project
+# located (from the project root) at ./MerlinMake/make.sh
+# It generates and executes the command line required to use the
+# proper version of merlin libraries based upon a file named 'dylib.manifest'
+# which must be located in the project root if dynamic libraries are required.
+# If the file does not exist, no error occurs, and the commandline will be
+# generated without referencing any dynamic libraries.
+# The project root is the same location as .git and Package.swift (if required).
 
-# The sole argument is either 'debug' or 'release' depending on configuration.
-# If no argument is specified defaults to 'debug'.
-
-# The file must either be named make.sh or use a symlink named run.sh
-# The filename is then detected; make.sh will build while run.sh will run.
+# Arguments:
+# --mode='build'|'run'|'list-dylib-paths', default is 'build', short key is -m
+# --configuration='debug'|'release', default is 'debug', short key -s -c
 
 # Dynamic library dependencies are specified in the file 'dylib.manifest' located in the same directory
 # as make.sh.
@@ -30,22 +33,59 @@
 #
 # The second format facilitates simple development of libraries by easily allowing a local directory
 # as a source.
+# For example:
+# Igis		LOCAL		/home/john-williams/projects/Igis
+# Scenes	0.1.8
 
-config=${1:-debug}
-filename=$(basename -- "$0")
-case $filename in
-    "run.sh")
-	mode="run";;
-    "make.sh")
-	mode="build";;
-    *)
-	# Terminate on error after message
-	echo "Expected filename to be either 'make.sh' or 'run.sh'"
-	exit 1;;
-esac
+# Reference: https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+# saner programming env: these switches turn some bugs into errors
+set -o errexit -o pipefail -o noclobber -o nounset
 
-if [[ ! "$config" =~ ^(debug|release)$ ]]; then
-    echo "Unexpected configuration; must be either debug or release, not $config"
+# Reference: https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+# Read options
+options=m:c:
+longOptions=mode:,configuration:
+! parsed=$(getopt --options=$options --longoptions=$longOptions --name "$0" -- "$@")
+if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+    # e.g. return value is 1
+    #  then getopt has complained about wrong arguments to stdout
+    exit 2
+fi
+# read getopt’s output this way to handle the quoting right:
+eval set -- "$parsed"
+
+# Defaults
+mode='build'
+configuration='debug'
+while true; do
+    case "$1" in
+	-m|--mode)
+	    mode="$2"
+	    shift 2
+	    ;;
+	-c|--configuration)
+	    configuration="$2"
+	    shift 2
+	    ;;
+	--)
+	    shift
+	    break
+	    ;;
+	*)
+	    echo "Unexpected argument $1"
+	    exit 3
+	    ;;
+    esac
+done
+
+# Verify arguments
+if [[ ! "$configuration" =~ ^(debug|release)$ ]]; then
+    echo "Unexpected configuration; must be either debug or release, not $configuration"
+    exit 1
+fi
+
+if [[ ! "$mode" =~ ^(build|run|list-dylib-paths)$ ]]; then
+    echo "Unexpected mode; must be either build, run or list-dylib-paths, not $mode"
     exit 1
 fi
 
@@ -67,20 +107,18 @@ get_script_dir () {
 }
 
 # Start with a basic command line and empty library path
-commandLine="swift $mode -c $config"
+dylibPaths=""
+commandLine="swift $mode -c $configuration"
 LD_LIBRARY_PATH=""
 
 # Find the manifest path
 # Because we're in a submodule of the root directory, we search one level up from the script location
 manifestPath="$( realpath "$(get_script_dir)/../dylib.manifest" )"
-echo "Loooking for the manifest at $manifestPath"
 
 # Read the manifest file
 # If it exists, it must be in the format projectName tag
 
 if [ -f $manifestPath ]; then
-    echo "Reading manifest at $manifestPath"
-
     while read line; do
 	if [ ! -z "$line" ]; then
 	    # If the line is not empty, it must be in the format specified
@@ -96,17 +134,15 @@ if [ -f $manifestPath ]; then
 	    if [[ "$line" =~ $localRegex ]]; then
 		project=${BASH_REMATCH[1]}
 		directory=${BASH_REMATCH[2]}
-		echo "Requires LOCAL $project @ LOCAL from $directory"
 
 		# The library path is determined by the exact name used for the directory
-		libraryPath="$directory/.build/$config"
+		libraryPath="$directory/.build/$configuration"
             elif [[ "$line" =~ $libraryRegex ]]; then
 		project=${BASH_REMATCH[1]}
 		tag=${BASH_REMATCH[2]}
-		echo "Requires LIBRARY $project @ $tag"
 
 		# Determine the library path based on the name of the project and tag
-		libraryPath="$MERLIN_LIBRARY_ROOT_DIR/$project-$tag/$project/.build/$config"
+		libraryPath="$MERLIN_LIBRARY_ROOT_DIR/$project-$tag/$project/.build/$configuration"
 	    else
 		echo "Unexpected line format: $line"
 		exit 1
@@ -118,6 +154,12 @@ if [ -f $manifestPath ]; then
 		exit 1
 	    fi
 
+	    # Build the dylib paths for parsing with one path per line
+	    if [[ ! -z "$dylibPaths" ]]; then
+		printf -v dylibPaths "$dylibPaths\n"
+	    fi
+	    dylibPaths="$dylibPaths$libraryPath"
+	    
 	    # Build the command line by appending the library for inclusion and linking
 	    commandLine="$commandLine -Xswiftc -I -Xswiftc $libraryPath"
 	    commandLine="$commandLine -Xswiftc -L -Xswiftc $libraryPath"
@@ -134,15 +176,21 @@ if [ -f $manifestPath ]; then
 	    export $dylibVariableName
 	fi 
     done < "$manifestPath"
-
-else
-    echo "No manifest found."
 fi
 
 # Export required variables
 export LD_LIBRARY_PATH
 
-# Whether or not there was a manifest, we evaluate the command line
-
-eval "$commandLine"
-echo "Done"
+# If the mode is run or build, we evaluate the command line
+case $mode in
+    build|run)
+	eval "$commandLine"
+	;;
+    list-dylib-paths)
+	echo "$dylibPaths"
+	;;
+    *)
+	echo "Unexpected mode $mode"
+	exit 1
+	;;
+esac
