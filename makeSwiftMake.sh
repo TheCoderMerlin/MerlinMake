@@ -20,5 +20,5 @@ if [[ -f "make.sh" ]]; then
 else
     echo "#!/bin/bash" >> make.sh
     echo "makeSwift \"\$@\"" >> make.sh
-    chmod a+x make.sh
+    chmod u+x make.sh
 fi
