@@ -12,14 +12,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# This script is generally included as a submodule within a Swift project
-# located (from the project root) at ./MerlinMake/make.sh
-# It generates and executes the command line required to use the
+# This script  generates and executes the command line required to use the
 # proper version of merlin libraries based upon a file named 'dylib.manifest'
 # which must be located in the project root if dynamic libraries are required.
 # If the file does not exist, no error occurs, and the commandline will be
 # generated without referencing any dynamic libraries.
 # The project root is the same location as .git and Package.swift (if required).
+# The script will build both packages and simple directories of *.swift files.
 
 # Arguments:
 # --mode='build'|'run'|'list-dylib-paths', default is 'build', short key is -m
@@ -129,9 +128,20 @@ manifestPath="$projectRoot/dylib.manifest"
 
 # Start with a basic command line and empty library path
 dylibPaths=""
-commandLine="swift $mode -c $configuration"
-LD_LIBRARY_PATH=""
+packageCommandLine="swift $mode -c $configuration"
 
+# For the simple command line (no package) we add the source files
+simpleBuildCommandLine="swiftc -o $projectRoot/main"
+if [ "$configuration" == "debug" ]; then
+    simpleBuildCommandLine="$simpleBuildCommandLine -g"
+fi
+simpleRunCommandLine="$projectRoot/main"
+while ifs= read -r line
+do
+    simpleBuildCommandLine="$simpleBuildCommandLine $line"
+done < <(find "$projectRoot" -name '*.swift')
+
+LD_LIBRARY_PATH=""
 
 # Read the manifest file (if it exists)
 if [ -f $manifestPath ]; then
@@ -177,9 +187,13 @@ if [ -f $manifestPath ]; then
 	    dylibPaths="$dylibPaths$libraryPath"
 	    
 	    # Build the command line by appending the library for inclusion and linking
-	    commandLine="$commandLine -Xswiftc -I -Xswiftc $libraryPath"
-	    commandLine="$commandLine -Xswiftc -L -Xswiftc $libraryPath"
-	    commandLine="$commandLine -Xswiftc -l$project"
+	    packageCommandLine="$packageCommandLine -Xswiftc -I -Xswiftc $libraryPath"
+	    packageCommandLine="$packageCommandLine -Xswiftc -L -Xswiftc $libraryPath"
+	    packageCommandLine="$packageCommandLine -Xswiftc -l$project"
+
+	    simpleBuildCommandLine="$simpleBuildCommandLine -I $libraryPath"
+	    simpleBuildCommandLine="$simpleBuildCommandLine -L $libraryPath"
+	    simpleBuildCommandLine="$simpleBuildCommandLine -l$project"
 	    
 	    # Build the LD_LIBRARY_PATH
 	    LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$libraryPath"
@@ -200,7 +214,16 @@ export LD_LIBRARY_PATH
 # If the mode is run or build, we evaluate the command line
 case $mode in
     build|run)
-	eval "$commandLine"
+	if [[ -f $packagePathname ]]; then
+	    eval "$packageCommandLine"
+	else
+	    if [ "$mode" == "run" ]; then
+		eval "$simpleBuildCommandLine && $simpleRunCommandLine"
+	    else
+		eval "$simpleBuildCommandLine"
+	    fi
+	fi
+	
 	;;
     list-dylib-paths)
 	echo "$dylibPaths"
