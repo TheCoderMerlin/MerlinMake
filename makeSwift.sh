@@ -92,32 +92,48 @@ fi
 # Requires: MERLIN_LIBRARY_ROOT_DIR (e.g. /usr/local/lib/merlin)
 [ -z "$MERLIN_LIBRARY_ROOT_DIR" ] && { echo "MERLIN_LIBRARY_ROOT_DIR must be defined"; exit 1; }
 
-# Reference: https://www.ostricher.com/2014/10/the-right-way-to-get-the-directory-of-a-bash-script/
-get_script_dir () {
-    source="${BASH_SOURCE[0]}"
-    # While $source is a symlink, resolve it
-    while [ -h "$source" ]; do
-	dir="$( cd -P "$( dirname "$source" )" && pwd )"
-	source="$( readlink "$source" )"
-	# If $source was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
-	[[ $source != /* ]] && source="$dir/$source"
-    done
-    dir="$( cd -P "$( dirname "$source" )" && pwd )"
-    echo "$dir"
-}
+# Find the project root
+# We search, in order, for Package.swift, then dylib.manifest, and finally main.swift
+projectRoot=""
+packagePathname=""
+manifestPathname=""
+mainPathname=""
+
+packagePathname=$(upfind -name 'Package.swift' -type f 2> /dev/null | head -n 1)
+if [[ -f $packagePathname ]]; then
+    projectRoot=$(dirname "$packagePathname")
+fi
+
+if [[ ! -d $projectRoot ]]; then
+    manifestPathname=$(upfind -name 'dylib.manifest' -type f 2> /dev/null | head -n 1)
+    if [[ -f $manifestPathname ]]; then
+	projectRoot=$(dirname "$manifestPathname")
+    fi
+fi
+
+if [[ ! -d $projectRoot ]]; then
+    mainPathname=$(upfind -name 'main.swift' -type f 2> /dev/null | head -n 1)
+    if [[ -f $mainPathname ]]; then
+	projectRoot=$(dirname "$mainPathname")
+    fi
+fi
+
+if [[ ! -d $projectRoot ]]; then
+    echo "Unable to determine project root from here"
+    exit 1
+fi
+
+# At this point, we've determined the project root
+# If a manifest is present, it will be located here:
+manifestPath="$projectRoot/dylib.manifest"
 
 # Start with a basic command line and empty library path
 dylibPaths=""
 commandLine="swift $mode -c $configuration"
 LD_LIBRARY_PATH=""
 
-# Find the manifest path
-# Because we're in a submodule of the root directory, we search one level up from the script location
-manifestPath="$( realpath "$(get_script_dir)/../dylib.manifest" )"
 
-# Read the manifest file
-# If it exists, it must be in the format projectName tag
-
+# Read the manifest file (if it exists)
 if [ -f $manifestPath ]; then
     while read line; do
 	if [ ! -z "$line" ]; then
