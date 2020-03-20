@@ -35,6 +35,13 @@
 # For example:
 # Igis		LOCAL		/home/john-williams/projects/Igis
 # Scenes	0.1.8
+#
+# An additional available option is to suffix the modifier 'MODULE' after either line format.
+# This has the result of suppressing the suffix of ".build/$configuration" to the libraryPath
+# This is appropriate for Modules which don't have a build process, such as CNCURSES
+# For example:
+# CNCURSES	LOCAL		/home/john-williams/projects/CNCURSES     MODULE
+# CNCURSES	0.1.8           MODULE
 
 # Reference: https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 # saner programming env: these switches turn some bugs into errors
@@ -151,27 +158,38 @@ if [ -f $manifestPath ]; then
 	    # The first case is specification of a library found in the MERLIN_LIBRARY_ROOT_DIR
 	    # This format specifies only a library name and version
 	    # e.g. "Igis 1.0.7"
-	    libraryRegex='^([[:alpha:]]+)[[:space:]]+([[:alnum:]\.]+)$'
+	    # or   "Igis 1.0.7 MODULE"
+	    libraryRegex='^([[:alpha:]]+)[[:space:]]+([[:alnum:]\.]+)[[:space:]]*(MODULE)?$'
 
 	    # An alterntive is specifying a local path which will be used directly
 	    # iff the tag is 'LOCAL'
-	    localRegex='^([[:alpha:]]+)[[:space:]]+LOCAL[[:space:]]+([[:alnum:]/-]+)$'
+	    # e.g. "Igis LOCAL /home/john-williams/Igis"
+	    # or   "Igis LOCAL /home/john-williams/Igis MODULE"
+	    localRegex='^([[:alpha:]]+)[[:space:]]+LOCAL[[:space:]]+([[:alnum:]/-]+)[[:space:]]*(MODULE)?$'
+	    
 	    
 	    if [[ "$line" =~ $localRegex ]]; then
 		project=${BASH_REMATCH[1]}
 		directory=${BASH_REMATCH[2]}
+		module=${BASH_REMATCH[3]}
 
 		# The library path is determined by the exact name used for the directory
-		libraryPath="$directory/.build/$configuration"
+		libraryPath="$directory"
             elif [[ "$line" =~ $libraryRegex ]]; then
 		project=${BASH_REMATCH[1]}
 		tag=${BASH_REMATCH[2]}
+		module=${BASH_REMATCH[3]}
 
 		# Determine the library path based on the name of the project and tag
-		libraryPath="$MERLIN_LIBRARY_ROOT_DIR/$project-$tag/$project/.build/$configuration"
+		libraryPath="$MERLIN_LIBRARY_ROOT_DIR/$project-$tag/$project"
 	    else
 		echo "Unexpected line format: $line"
 		exit 1
+	    fi
+
+	    # If we're not dealing with a module, we need to append the acutal build directory to the path
+	    if [[ ! "$module" =~ "MODULE" ]]; then
+		libraryPath="$libraryPath/.build/$configuration"
 	    fi
 
 	    # Verify that the libraryPath exists
