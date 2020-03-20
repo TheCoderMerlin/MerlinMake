@@ -207,11 +207,20 @@ if [ -f $manifestPath ]; then
 	    # Build the command line by appending the library for inclusion and linking
 	    packageCommandLine="$packageCommandLine -Xswiftc -I -Xswiftc $libraryPath"
 	    packageCommandLine="$packageCommandLine -Xswiftc -L -Xswiftc $libraryPath"
-	    packageCommandLine="$packageCommandLine -Xswiftc -l$project"
+
+	    # If this isn't a module, we need to specify use of the library
+	    if [[ ! "$module" =~ "MODULE" ]]; then
+		packageCommandLine="$packageCommandLine -Xswiftc -l$project"
+	    fi
+	    
 
 	    simpleBuildCommandLine="$simpleBuildCommandLine -I $libraryPath"
 	    simpleBuildCommandLine="$simpleBuildCommandLine -L $libraryPath"
-	    simpleBuildCommandLine="$simpleBuildCommandLine -l$project"
+	    
+	    # If this isn't a module, we need to specify use of the library
+	    if [[ ! "$module" =~ "MODULE" ]]; then
+		simpleBuildCommandLine="$simpleBuildCommandLine -l$project"
+	    fi
 	    
 	    # Build the LD_LIBRARY_PATH
 	    LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$libraryPath"
