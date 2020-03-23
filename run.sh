@@ -21,12 +21,12 @@
 runPath=$(upfind -name 'run.sh' -executable 2> /dev/null | head -n 1)
 if [[ -f $runPath ]]; then
     runCommandLine="$runPath $@"
-    eval $runCommandLine
+    eval "$runCommandLine"
 else
     makePath=$(upfind -name 'make.sh' -executable 2> /dev/null | head -n 1)
     if [[ -f $makePath ]]; then
 	makeCommandLine="$makePath --mode=run $@"
-	eval $makeCommandLine
+	eval "$makeCommandLine"
     else
 	echo "neither run.sh nor make.sh were found from here"
 	exit 1
