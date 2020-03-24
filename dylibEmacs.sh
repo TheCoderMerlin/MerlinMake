@@ -30,7 +30,7 @@ fi
 libraryList=""
 makePath=$(upfind -name 'make.sh' -executable 2> /dev/null | head -n 1)
 if [[ -f $makePath ]]; then
-    makeCommandLine="$makePath --mode=list-dylib-paths $@"
+    makeCommandLine="'$makePath' --mode=list-dylib-paths $@"
     while ifs= read -r line
     do
 	if [ ! -z "$line" ]; then

@@ -17,7 +17,7 @@
 # specified parameters after inserting --mode=list-dylib-paths
 makePath=$(upfind -name 'make.sh' -executable 2> /dev/null | head -n 1)
 if [[ -f $makePath ]]; then
-    makeCommandLine="$makePath --mode=list-dylib-paths $@"
+    makeCommandLine="'$makePath' --mode=list-dylib-paths $@"
     eval $makeCommandLine
 else
     echo "make.sh not found from here"
