@@ -31,12 +31,13 @@ libraryList=""
 makePath=$(upfind -name 'make.sh' -executable 2> /dev/null | head -n 1)
 if [[ -f $makePath ]]; then
     makeCommandLine="'$makePath' --mode=list-dylib-paths $@"
+    commandOutput=$(eval \$$makeCommandLine)
     while ifs= read -r line
     do
 	if [ ! -z "$line" ]; then
 	    libraryList="$libraryList \"$line\""
 	fi
-    done < <($makeCommandLine)
+    done <<< "$commandOutput"
 else
     echo "make.sh not found from here"
     exit 1
