@@ -22,7 +22,7 @@
 
 # Arguments:
 # --mode='build'|'run'|'list-dylib-paths', default is 'build', short key is -m
-# --configuration='debug'|'release', default is 'debug', short key -s -c
+# --configuration='debug'|'release', default is 'debug', short key is -c
 
 # Dynamic library dependencies are specified in the file 'dylib.manifest' located in the same directory
 # as make.sh.
