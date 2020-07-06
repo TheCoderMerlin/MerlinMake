@@ -21,7 +21,8 @@
 # The script will build both packages and simple directories of *.swift files.
 
 # Arguments:
-# --mode='build'|'run'|'list-dylib-paths', default is 'build', short key is -m
+# --mode='build'|'run'|'list-dylib-paths'|'list-ld-library-path',
+#         default is 'build', short key is -m
 # --configuration='debug'|'release', default is 'debug', short key is -c
 
 # Dynamic library dependencies are specified in the file 'dylib.manifest' located in the same directory
@@ -46,6 +47,7 @@
 # Reference: https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 # saner programming env: these switches turn some bugs into errors
 set -o errexit -o pipefail -o noclobber -o nounset
+set -eu
 
 # Reference: https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 # Read options
@@ -90,8 +92,8 @@ if [[ ! "$configuration" =~ ^(debug|release)$ ]]; then
     exit 1
 fi
 
-if [[ ! "$mode" =~ ^(build|run|list-dylib-paths)$ ]]; then
-    echo "Unexpected mode; must be either build, run or list-dylib-paths, not $mode"
+if [[ ! "$mode" =~ ^(build|run|list-dylib-paths|list-ld-library-path)$ ]]; then
+    echo "Unexpected mode; must be either build, run list-dylib-paths, or list-ld-library-path not $mode"
     exit 1
 fi
 
@@ -254,6 +256,9 @@ case $mode in
 	;;
     list-dylib-paths)
 	echo "$dylibPaths"
+	;;
+    list-ld-library-path)
+	echo "$LD_LIBRARY_PATH"
 	;;
     *)
 	echo "Unexpected mode $mode"
