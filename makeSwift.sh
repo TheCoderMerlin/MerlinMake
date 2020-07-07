@@ -145,10 +145,17 @@ if [ "$configuration" == "debug" ]; then
     simpleBuildCommandLine="$simpleBuildCommandLine -g"
 fi
 simpleRunCommandLine="$projectRoot/main"
-while ifs= read -r line
-do
-    simpleBuildCommandLine="$simpleBuildCommandLine $line"
-done < <(find "$projectRoot" -name '*.swift')
+
+# Collecting the file names in a large, package-based project can take a relatively long time
+# As such, we skip this if we're building a package because, in such a case, it will simply
+# be ignored anyway
+if [[ ! -f $packagePathname ]]
+then
+    while ifs= read -r line
+    do
+	simpleBuildCommandLine="$simpleBuildCommandLine $line"
+    done < <(find "$projectRoot" -name '*.swift')
+fi
 
 LD_LIBRARY_PATH=""
 
