@@ -12,13 +12,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# This script simply creates a make.sh file in the current directory
-# which invokes the standard makeSwift script.
-if [[ -f "make.sh" ]]; then
-    echo "make.sh already exists here"
+# This script simply creates a make.sh file and Package.swift
+# in the current directory (after verifying that they don't yet exist
+# using upfind)
+set -eu
+
+scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+makePath=$(upfind -name 'make.sh' -executable 2> /dev/null | head -n 1)
+packagePath=$(upfind -name 'Package.swift' 2> /dev/null | head -n 1)
+if [[ -f $makePath ]]
+then
+    echo "make.sh already exists: $makePath"
+    exit 1
+elif [[ -f $packagePath ]]
+then
+    echo "Package.swift already exists: $packagePath"
     exit 1
 else
-    echo "#!/bin/bash" >> make.sh
-    echo "makeSwift \"\$@\"" >> make.sh
-    chmod u+x make.sh
+    cp "$scriptDirectory/SimplePackage.swift" "./Package.swift"
+    cp "$scriptDirectory/SimpleSwiftMake.sh" "./make.sh"
+    echo "Done"
 fi
