@@ -35,7 +35,9 @@ if [[ -f $makePath ]]; then
     while ifs= read -r line
     do
 	if [ ! -z "$line" ]; then
-	    libraryList="$libraryList \"$line\""
+	    libraryList+=$'\t'
+	    libraryList+=" \"-Xlinker\" \"-L\" \"-Xlinker\" \"$line\" \"-Xswiftc\" \"-I\" \"-Xswiftc\" \"$line\" "
+	    libraryList+=$'\n'
 	fi
     done <<< "$commandOutput"
 else
@@ -45,13 +47,14 @@ fi
 
 # Create a new configuration file (unless list is empty)
 if [ ! -z "$libraryList" ]; then
-    echo ";;; Directory Local Variables" > $configurationFileName
+    echo ";;; Directory Local Variables"                                        > $configurationFileName
     echo ";;; For more information see (info \"(emacs) Directory Variables\")" >> $configurationFileName
-    echo "" >> $configurationFileName
-    echo "((swift-mode" >> $configurationFileName
-    echo "  (flycheck-swift-include-search-paths $libraryList)))" >> $configurationFileName
+    echo ""                                                                    >> $configurationFileName
+    echo "((swift-mode . "                                                     >> $configurationFileName
+    echo "  ((lsp-sourcekit-extra-args . ("                                    >> $configurationFileName
+    echo "$libraryList"                                                        >> $configurationFileName
+    echo ")))))"                                                               >> $configurationFileName
     echo "Done"
 else
     echo "Not creating configuration file because dylib list is empty."
 fi
-
