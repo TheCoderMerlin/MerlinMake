@@ -170,8 +170,6 @@ if [ -f $manifestPath ]; then
     then
 	echo "ERROR: '$manifestPath' has been changed but '$emacsDirLocalPath' has not."
 	echo "       Did you mean to execute dylibEmacs?"
-	stat "$emacsDirLocalPath"
-	stat "$manifestPath"
 	exit 1
     fi
     
