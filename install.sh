@@ -14,6 +14,7 @@ cp upfind.sh               "$targetDirectory/upfind"
 cp warnIfAlreadyRunning.sh "$targetDirectory/warnIfAlreadyRunning"
 cp deployMerlinLibrary.sh  "$targetDirectory/deployMerlinLibrary"
 cp lockMerlinLibrary.sh    "$targetDirectory/lockMerlinLibrary"
+cp skel-init.sh            "$targetDirectory/skel-init"
 
 # Installs required support files
 cp SimpleSwiftMake.sh  "$targetDirectory/SimpleSwiftMake.sh"
