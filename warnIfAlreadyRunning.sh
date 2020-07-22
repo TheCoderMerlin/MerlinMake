@@ -83,16 +83,18 @@ else
 		echo -e "\tType 'fg $jobNumber' to resume"
 	    fi
 	done <<< $jobs
-	echo "Alternatively, you may specify --force-open to force open a new instance."
     done
 
     # If no jobs are already running, start a new instance of target with the specified
     # arguments
+    # Otherwise, inform the user that they have the option of forcing the application to open
     if [ ${#pidsInShell[@]} -eq 0 ]; then
 	commandPath=`which $target`
 	echo "$target is not already running.  Starting $target."
 	commandLine="$commandPath $@"
 	eval $commandLine
+    else
+	echo "Alternatively, you may specify --force-open to force open a new instance."
     fi
 fi
 
