@@ -7,6 +7,7 @@ targetDirectory=/usr/local/bin
 cp build.sh                "$targetDirectory/build"
 cp dylib.sh                "$targetDirectory/dylib"
 cp dylibEmacs.sh           "$targetDirectory/dylibEmacs"
+cp dylibLoader.sh          "$targetDirectory/dylibLoader"
 cp makeSwift.sh            "$targetDirectory/makeSwift"
 cp swift-init.sh           "$targetDirectory/swift-init"
 cp run.sh                  "$targetDirectory/run"
