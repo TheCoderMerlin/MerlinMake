@@ -47,7 +47,7 @@ loaderPathname="$(dirname $makePath)/$loaderFilename"
 if [ ! -z "$libraryList" ]; then
     echo "set -eu"                              > "$loaderPathname"
     echo "export LD_LIBRARY_PATH=$libraryList" >> "$loaderPathname"
-    echo "$executableFilename"                 >> "$loaderPathname"
+    echo "$executableFilename \"\$@\""         >> "$loaderPathname"
     chmod a+rx "$loaderPathname"
     echo "Done"
 else
