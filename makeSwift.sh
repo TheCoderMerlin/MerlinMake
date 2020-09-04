@@ -165,15 +165,24 @@ if [ -f $manifestPath ]; then
     # Stop here if a .dir-locals.el exists but is OLDER than the dylib.manifest
     # Not updating the .dir-locals.el file will lead to odd and difficult to track down
     # errors.
+    # However, because we often start by cloning a repository the timestamps may be very
+    # close to one another.  Therefore, we ignore small differences, and only whine
+    # if the manifest is at least a minute newer than .dir-locals.el
     emacsDirLocalPath="$projectRoot/.dir-locals.el"
-    if [ -f "$emacsDirLocalPath" ] && [ "$emacsDirLocalPath" -ot "$manifestPath" ]
+    if [ -f "$emacsDirLocalPath" ]
     then
-	echo "ERROR: '$manifestPath' has been changed but '$emacsDirLocalPath' has not."
-	echo "       Did you mean to execute dylibEmacs?"
-	exit 1
+	emacsDirLocalSeconds=$(date --reference="$emacsDirLocalPath" +%s)
+	manifestSeconds=$(date --reference="$manifestPath" +%s)
+	manifestNewerBySeconds=$((manifestSeconds - emacsDirLocalSeconds))
+	manifestNewerByOneMinute=$((manifestNewerBySeconds - 60))
+	if (( manifestNewerByOneMinute > 0 ))
+	then
+	    echo "ERROR: '$manifestPath' has been changed but '$emacsDirLocalPath' has not."
+	    echo "       Did you mean to execute dylibEmacs?"
+	    exit 1
+	fi
     fi
-    
-    
+
     while read line; do
 	if [ ! -z "$line" ]; then
 	    # If the line is not empty, it must be in the format specified
