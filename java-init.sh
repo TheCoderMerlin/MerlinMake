@@ -19,7 +19,7 @@ set -eu
 
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 makePath=$(upfind -name 'make.sh' -executable 2> /dev/null | head -n 1)
-runPath=$(upfind -name 'run.' 2> /dev/null | head -n 1)
+runPath=$(upfind -name 'run.sh' 2> /dev/null | head -n 1)
 if [[ -f $makePath ]]
 then
     echo "make.sh already exists: $makePath"
