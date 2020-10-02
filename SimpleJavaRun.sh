@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Try to find one file which contains the main() function
-filesContainingMain=$(grep -E -l "public[[:space:]]+static[[:space:]]+void[[:space:]]+main[[:space:]]*\([[:space:]]*String[[:space:]]+args[[:space:]]*\[[[:space:]]*\][[:space:]]*\)" *.java)
+# public static void main(...)
+filesContainingMain=$(grep -E -l "public[[:space:]]+static[[:space:]]+void[[:space:]]+main[[:space:]]*\(.+\)" *.java)
+
 
 # Ensure that we found only one file
 fileCount=$(echo $filesContainingMain | wc --words)
@@ -20,5 +22,5 @@ fi
 fileBasename=$(basename --suffix=.java $filesContainingMain)
 
 # Run
-commandLine="java $fileBasename"
-eval $commandLine
+java $fileBasename
+
