@@ -47,13 +47,15 @@ fi
 
 # Create a new configuration file (unless list is empty)
 if [ ! -z "$libraryList" ]; then
-    echo ";;; Directory Local Variables"                                        > $configurationFileName
-    echo ";;; For more information see (info \"(emacs) Directory Variables\")" >> $configurationFileName
-    echo ""                                                                    >> $configurationFileName
-    echo "((swift-mode . "                                                     >> $configurationFileName
-    echo "  ((lsp-sourcekit-extra-args . ("                                    >> $configurationFileName
-    echo "$libraryList"                                                        >> $configurationFileName
-    echo ")))))"                                                               >> $configurationFileName
+    echo \
+';;; Directory Local Variables
+;;; For more information see (info "(emacs) Directory Variables")
+
+((swift-mode . 
+  ((lsp-sourcekit-extra-args . (
+
+)))))' > $configurationFileName
+
     echo "Done"
 else
     echo "Not creating configuration file because dylib list is empty."
