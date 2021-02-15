@@ -144,7 +144,7 @@ simpleBuildCommandLine="swiftc -o '$projectRoot/main'"
 if [ "$configuration" == "debug" ]; then
     simpleBuildCommandLine="$simpleBuildCommandLine -g"
 fi
-simpleRunCommandLine="$projectRoot/main"
+simpleRunCommandLine="'$projectRoot/main'"
 
 # Collecting the file names in a large, package-based project can take a relatively long time
 # As such, we skip this if we're building a package because, in such a case, it will simply
