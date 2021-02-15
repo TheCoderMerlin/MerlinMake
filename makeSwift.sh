@@ -140,7 +140,7 @@ dylibPaths=""
 packageCommandLine="swift $mode -c $configuration"
 
 # For the simple command line (no package) we add the source files
-simpleBuildCommandLine="swiftc -o $projectRoot/main"
+simpleBuildCommandLine="swiftc -o '$projectRoot/main'"
 if [ "$configuration" == "debug" ]; then
     simpleBuildCommandLine="$simpleBuildCommandLine -g"
 fi
@@ -153,14 +153,14 @@ if [[ ! -f $packagePathname ]]
 then
     while ifs= read -r line
     do
-	simpleBuildCommandLine="$simpleBuildCommandLine $line"
+	simpleBuildCommandLine="$simpleBuildCommandLine '$line'"
     done < <(find "$projectRoot" -name '*.swift')
 fi
 
 LD_LIBRARY_PATH=""
 
 # Read the manifest file (if it exists)
-if [ -f $manifestPath ]; then
+if [ -f "$manifestPath" ]; then
 
     # Stop here if a .dir-locals.el exists but is OLDER than the dylib.manifest
     # Not updating the .dir-locals.el file will lead to odd and difficult to track down
@@ -236,17 +236,16 @@ if [ -f $manifestPath ]; then
 	    dylibPaths="$dylibPaths$libraryPath"
 	    
 	    # Build the command line by appending the library for inclusion and linking
-	    packageCommandLine="$packageCommandLine -Xswiftc -I -Xswiftc $libraryPath"
-	    packageCommandLine="$packageCommandLine -Xswiftc -L -Xswiftc $libraryPath"
+	    packageCommandLine="$packageCommandLine -Xswiftc -I -Xswiftc '$libraryPath'"
+	    packageCommandLine="$packageCommandLine -Xswiftc -L -Xswiftc '$libraryPath'"
 
 	    # If this isn't a module, we need to specify use of the library
 	    if [[ ! "$module" =~ "MODULE" ]]; then
 		packageCommandLine="$packageCommandLine -Xswiftc -l$project"
 	    fi
 	    
-
-	    simpleBuildCommandLine="$simpleBuildCommandLine -I $libraryPath"
-	    simpleBuildCommandLine="$simpleBuildCommandLine -L $libraryPath"
+	    simpleBuildCommandLine="$simpleBuildCommandLine -I '$libraryPath'"
+	    simpleBuildCommandLine="$simpleBuildCommandLine -L '$libraryPath'"
 	    
 	    # If this isn't a module, we need to specify use of the library
 	    if [[ ! "$module" =~ "MODULE" ]]; then
