@@ -63,6 +63,20 @@ then
     echo "DRY RUN only.  No files will be deleted."
 fi
 
+function cleanDirectory {
+    local directory=$1
+    if [ -d "$directory" ]
+    then
+	directorySize=$(du -sb "$directory" | cut -f1)
+	totalSize=$((totalSize + directorySize))
+	echo "Cleaning `(pwd)`/$directory to free $directorySize bytes"
+
+	if [ "$dryrun" == 'false' ]
+	then
+	    rm -rf "$directory"
+	fi
+    fi
+}
 
 # Regardless from where we're executing, we always operate ONLY on the ~/Merlin directory
 pushd "$merlinDirectory" > /dev/null
@@ -82,17 +96,8 @@ do
 		# Determine if a .build directory exists
 		pushd "$challenge" > /dev/null
 
-		if [ -d ".build" ]
-		then
-		    directorySize=$(du -sb '.build' | cut -f1)
-		    totalSize=$((totalSize + directorySize))
-		    echo "Cleaning $challenge to free $directorySize bytes"
-
-		    if [ "$dryrun" == "false" ]
-		    then
-			rm -rf '.build'
-		    fi
-		fi
+		cleanDirectory '.build'
+		cleanDirectory '.merlin/build/.build'
 
 		popd > /dev/null # Pop challenge
 	    fi
