@@ -190,13 +190,13 @@ if [ -f "$manifestPath" ]; then
 	    # This format specifies only a library name and version
 	    # e.g. "Igis 1.0.7"
 	    # or   "Igis 1.0.7 MODULE"
-	    libraryRegex='^([[:alpha:]]+)[[:space:]]+([[:alnum:]\.]+)[[:space:]]*(MODULE)?$'
+	    libraryRegex='^([[:alnum:]]+)[[:space:]]+([[:alnum:]\.]+)[[:space:]]*(MODULE)?$'
 
 	    # An alterntive is specifying a local path which will be used directly
 	    # iff the tag is 'LOCAL'
 	    # e.g. "Igis LOCAL /home/john-williams/Igis"
 	    # or   "Igis LOCAL /home/john-williams/Igis MODULE"
-	    localRegex='^([[:alpha:]]+)[[:space:]]+LOCAL[[:space:]]+([[:alnum:]/-]+)[[:space:]]*(MODULE)?$'
+	    localRegex='^([[:alnum:]]+)[[:space:]]+LOCAL[[:space:]]+([[:alnum:]/-]+)[[:space:]]*(MODULE)?$'
 	    
 	    
 	    if [[ "$line" =~ $localRegex ]]; then
