@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script is part of the MerlinMake repository
-# Copyright (C) 2018,2019,2020,2021 Tango Golf Digital, LLC
+# Copyright (C) 2018,2019,2020,2021 CoderMerlin.com
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
