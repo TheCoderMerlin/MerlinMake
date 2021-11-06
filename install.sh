@@ -18,6 +18,7 @@ cp deployMerlinLibrary.sh  "$targetDirectory/deployMerlinLibrary"
 cp lockMerlinLibrary.sh    "$targetDirectory/lockMerlinLibrary"
 cp skel-init.sh            "$targetDirectory/skel-init"
 cp merlin-clean.sh         "$targetDirectory/merlin-clean"
+cp swift-clean.sh          "$targetDirectory/swift-clean"
 
 # Installs required support files
 cp SimpleSwiftMake.sh  "$targetDirectory/SimpleSwiftMake.sh"
