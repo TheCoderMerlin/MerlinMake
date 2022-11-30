@@ -56,6 +56,11 @@ build --configuration=release || { echo "Failed to build release version"; exit 
 echo "Adjusting permissions on $targetDir"
 chmod -R a+rX "$targetDir" || { echo "Failed to adjust permissions on directory $targetDir"; exit 1; }
 
+# Add path to list of merlin library paths
+echo "Adding path to list of melin libraries"
+merlinLibraryListPathname="/etc/profile.d/52-merlin.sh"
+echo "export MERLIN_LIBRARY_PATH_$projectName=$targetDir/$projectName" >> "$merlinLibraryListPathname"
+
 # Return to original directory
 popd 
 popd
