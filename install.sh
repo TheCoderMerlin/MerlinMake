@@ -22,6 +22,9 @@ cp merlin-clean.sh         "$targetDirectory/merlin-clean"
 cp swift-clean.sh          "$targetDirectory/swift-clean"
 cp make-swift-doc.sh       "$targetDirectory/make-swift-doc"
 
+# Install utility files
+cp www-check-perms.sh      "$targetDirectory/www-check-perms"
+
 # Installs required support files
 cp SimpleSwiftMake.sh  "$targetDirectory/SimpleSwiftMake.sh"
 cp SimplePackage.swift "$targetDirectory/SimplePackage.swift"
