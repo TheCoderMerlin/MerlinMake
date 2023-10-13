@@ -60,7 +60,7 @@ do
     for fieldIndex in $(seq 0 $((fieldCount-1)) )
     do
 	fieldValue=$(echo $line | csvcut --skipinitialspace -c $((fieldIndex+1)) | sed -e 's/^"\(.*\)"$/\1/')
-	declare "${fieldNames[$fieldIndex]}=${fieldValue}"
+	declare -x "${fieldNames[$fieldIndex]}=${fieldValue}"
     done
     envsubst < "$templatePathname" | tee --append "$outputPathname"
 done < <(tail -n +2 "$csvPathname")
