@@ -26,6 +26,7 @@ cp make-swift-doc.sh       "$targetDirectory/make-swift-doc"
 cp www-check-perms.sh      "$targetDirectory/www-check-perms"
 cp csvToSQL.sh             "$targetDirectory/csvToSQL"
 cp flowstate.sh            "$targetDirectory/flowstate"
+cp isFlowstate.sh          "$targetDirectory/isFlowstate"
 
 # Installs required support files
 cp SimpleSwiftMake.sh  "$targetDirectory/SimpleSwiftMake.sh"

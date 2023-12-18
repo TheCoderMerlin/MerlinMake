@@ -13,11 +13,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Prints the last three characters of the first line of the /etc/flowstate file
-# e.g. "prd" or "stg"
-# Example usage: flowstate
+# iff it matches the provided argument, e.g. "prd" or "stg"
+# Example usage: flowstate prd
+# This is useful for screen status
 
 # Halt on errors and undefined environment variables
 set -eu
 
-sed -n '1{s/.*\(.\{3\}\)$/\1/;p;q}' /etc/flowstate
+# Validate parameters
+if [ $# != 1 ]
+then
+    echo -e "Usage: $0 <targetFlowstate>"
+    exit 1
+fi
+targetFlowstate=$1
+
+echo "$([ "$(flowstate)" = "$targetFlowstate" ] && echo "$targetFlowstate")"
 
